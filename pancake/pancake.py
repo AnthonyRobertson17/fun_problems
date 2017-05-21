@@ -4,10 +4,38 @@ from random import randint
 def joseph_sorts():
     return
 
+# This sort gets the top "group" of pancakes (that have the same face up),
+# figures out if they need to be flipped upside down or not, and then
+# flips the group to the bottom of the stack
+# This is better than ginger but still inefficiant
+# smart will extend the top group after making it upside down
+def anthony_sorts(smart):
+    # Global variables
+    global stack, numPancakes
+
+    lastIndex = numPancakes - 1
+    numDone = 0
+    while numDone < numPancakes:
+        i = 0
+        face = stack[i]
+        # Find top group thats within the 'not done' stack
+        while i + 1 <= lastIndex - numDone and stack[i + 1] == face:
+            i += 1
+        # Make sure group is upside down
+        if face == 1:
+            flip(i)
+        if smart == 1:
+            while i + 1 <= lastIndex - numDone and stack[i + 1] == 0:
+                i += 1
+        flip(lastIndex - numDone)
+        numDone += i + 1
+    return
+
 # This sort looks at the top pancake and makes sure its upside down
 # The stack is then flipped to "Thow the top pancake to the bottom"
 # The process is repeated flipping 1 pancake less each time until
 # the entire stack is flipped
+# BAD sort, ginger should feel bad
 def ginger_sorts():
     # Global Variables
     global stack, numPancakes
@@ -51,20 +79,22 @@ def print_report(name):
     global numFlips, avgFlipSize, numFlipped
 
     avgFlipSize = numFlipped / numFlips
-    print('-----------------------')
-    print(' Results - ', name)
-    print('-----------------------')
-    print('Number of Pancakes: ', numPancakes)
-    print('Total Flips: ', numFlips)
-    print('Average Pancakes / Flip: ', avgFlipSize)
+    print ('-----------------------')
+    print ('     ', name)
+    print ('-----------------------')
+    print ('Total Flips: ', numFlips)
+    print ('Total Pancakes Flipped: ', numFlipped)
+    print ('Average Pancakes / Flip: ', avgFlipSize)
     return
 
 # Resets the stat tracking variables
 def reset():
     # Global Variables
-    global numFlips, avgFlipSize, numFlipped
+    global numFlips, avgFlipSize, numFlipped, stack
+    global originalStack
 
     numFlips = numFlipped = avgFlipSize = 0
+    stack = originalStack[:]
     return
 
 # Set up a randomized stack of 0's and 1's
@@ -79,6 +109,7 @@ def randomize_stack():
 def init():
     # Global Variables
     global stack, numPancakes, numRuns, visual, fileIn
+    global originalStack
 
     stack = []
     fileIn = open('input.txt', 'r')
@@ -87,13 +118,27 @@ def init():
     visual = int(fileIn.readline())
     fileIn.close()
     randomize_stack()
+    originalStack = stack[:]
+
 
 
 def main():
+    # Global variables
+    global numPancakes
     init()
     reset()
+    print ('========================================')
+    print ('                Results')
+    print ('Number of Pancakes: ', numPancakes)
+    print ('========================================')
     ginger_sorts()
     print_report('Ginger')
+    reset()
+    anthony_sorts(0)
+    print_report('Anthony DUMB')
+    reset()
+    anthony_sorts(1)
+    print_report('Anthony SMART')
     return
 
 if __name__ == '__main__':
